@@ -4,11 +4,15 @@ import os
 import lexer
 import parse
 import interpreter
-
+from tkinter import ttk
 
 class GUI(object):
     root = Tk()
     root.title("LOLTERPRETER")
+    style = ttk.Style()
+    style.theme_use('clam')
+    style.configure("Horizontal.TScrollbar", gripcount=0, background="white", troughcolor="gray12", bordercolor="black", arrowcolor="gray25")
+    style.configure("Vertical.TScrollbar", gripcount=0, background="white", troughcolor="gray12", bordercolor="black", arrowcolor="gray25")
 
     def __init__(self):
         self.file = ""
@@ -16,6 +20,7 @@ class GUI(object):
 
     def setup(self):
         root = self.root
+        root.configure(bg='black')
 
         self.textEditor()
         self.lexemes()
@@ -28,7 +33,7 @@ class GUI(object):
     # will be called every time execute button is pressed
     def execute(self, program):
         widgets = self.root.winfo_children()
-        console = widgets[22]
+        console = widgets[23]
         console.config(state=NORMAL)
         console.delete("1.0", END) # deletes the content of the console
 
@@ -65,6 +70,10 @@ class GUI(object):
             interpret.program()
             #interpret.symbol_table will be the list of identifiers and their values
             symbol_table = interpret.symbol_table
+            for i in range(0, identifier.index("end")):
+                identifier.itemconfig(i, {'fg': 'white'})
+                value.itemconfig(i, {'fg': 'white'})
+
 
 
     # populates lexeme table
@@ -74,31 +83,38 @@ class GUI(object):
         class_col = widgets[10]
         lexeme_col.delete(0, END)
         class_col.delete(0, END)
+
         if err != 0:
+            fg_idx = 0
             for i in range(len(tokens)-1):
                 if tokens[i][1] != "EOL":
                     lexeme_col.insert(END, tokens[i][1])
+                    lexeme_col.itemconfig(fg_idx, {'fg': 'white'})
                     class_col.insert(END, tokens[i][0])
+                    class_col.itemconfig(fg_idx, {'fg': 'white'})
+                    fg_idx += 1
 
 
     def fileExplorer(self, text_editor):
         root = self.root
-        file_label = Label(root, text="(NONE)")
+        file_label = Label(root, text="No file selected...")
         file_label.grid(row=0, column=0, padx=20, pady=3, sticky=W)
+        file_label.configure(background="black", foreground="magenta2")
 
-        fileExplorer_btn = Button(root, text="Select File", command=lambda: self.selectFile(text_editor, file_label))
+        fileExplorer_btn = Button(root, text="SELECT FILE", command=lambda: self.selectFile(text_editor, file_label))
         fileExplorer_btn.grid(row=0, column=1, padx=20, pady=3, sticky=E)
-
+        fileExplorer_btn.configure(background="black", foreground="magenta2")
 
     def textEditor(self):
         root = self.root
         text_editor = Text(root, width=50, height=15, wrap=NONE)
         text_editor.grid(row=1, column=0, rowspan=2, columnspan=2)
+        text_editor.configure(background="gray12", foreground="plum1", insertbackground="white")
 
-        scrollbarY = Scrollbar(root)
+        scrollbarY = ttk.Scrollbar(root, orient="vertical")
         scrollbarY.grid(row=1, column=2, rowspan=2, sticky="NS, W")
 
-        scrollbarX = Scrollbar(root, orient="horizontal")
+        scrollbarX = ttk.Scrollbar(root, orient="horizontal")
         scrollbarX.grid(row=3, column=0, columnspan=2, sticky="EW, S")
 
         text_editor.config(yscrollcommand = scrollbarY.set, xscrollcommand=scrollbarX.set, height=23, width=50)
@@ -109,24 +125,32 @@ class GUI(object):
 
         execute_btn = Button(root, text="EXECUTE", command=lambda: self.execute(text_editor.get(1.0, END))) # pass the current contents of the text editor to execute function
         execute_btn.grid(row=4, column=0, columnspan=10, padx=20, pady=3, sticky="E, W")
+        execute_btn.configure(background="orchid1", foreground="black", font="Helvetica 12 bold")
+
 
         
     def lexemes(self):
         root = self.root
         title = Label(root, text="LEXEMES")
         title.grid(row=0, column=3, columnspan=3, sticky="E, W")
+        title.configure(background="black", foreground="white", font="bold")
 
         lex_label = Label(root, text="Lexeme")
         lex_label.grid(row=1, column=3)
+        lex_label.configure(background="black", foreground="white")
 
         lexeme = Listbox(root)
         lexeme.grid(row=2, column=3)
 
         class_label = Label(root, text="Classification")
         class_label.grid(row=1, column=4)
+        class_label.configure(background="black", foreground="white")
 
         classification = Listbox(root)
         classification.grid(row=2, column=4)
+
+        lexeme.configure(background="gray12")
+        classification.configure(background="gray12")
 
         self.tableScrollBar(lexeme, classification, 2, 3)
 
@@ -135,18 +159,24 @@ class GUI(object):
         root = self.root
         title = Label(root, text="SYMBOL TABLE")
         title.grid(row=0, column=7, columnspan=3, padx=20, pady=3)
+        title.configure(background="black", foreground="white", font="bold")
 
         ident_label = Label(root, text="Identifier")
         ident_label.grid(row=1, column=7, padx=20, pady=3)
+        ident_label.configure(background="black", foreground="white")
 
         identifier = Listbox(root)
         identifier.grid(row=2, column=7)
 
         value_label = Label(root, text="Value")
         value_label.grid(row=1, column=8, padx=20, pady=3)
-
+        value_label.configure(background="black", foreground="white")
+        
         value = Listbox(root)
         value.grid(row=2, column=8)
+
+        identifier.configure(background="gray12")
+        value.configure(background="gray12")
 
         self.tableScrollBar(identifier, value, 2, 7)
 
@@ -154,13 +184,14 @@ class GUI(object):
     # lengthy because the columns of the tables are independent from each other. Thus, binding/synchronizing them is necessary
     def tableScrollBar(self, col1, col2, rowNum, colNum):
         root = self.root
-        scrollbarY = Scrollbar(root)
+
+        scrollbarY = ttk.Scrollbar(root, orient="vertical")
         scrollbarY.grid(row=rowNum, column=colNum+3, sticky="NS, W")
 
-        scrollbarX1 = Scrollbar(root, orient="horizontal")
+        scrollbarX1 = ttk.Scrollbar(root, orient="horizontal")
         scrollbarX1.grid(row=rowNum+1, column=colNum, columnspan=1, sticky="EW, S")
 
-        scrollbarX2 = Scrollbar(root, orient="horizontal")
+        scrollbarX2 = ttk.Scrollbar(root, orient="horizontal")
         scrollbarX2.grid(row=rowNum+1, column=colNum+1, columnspan=2, sticky="EW, S")
 
         col1.config(yscrollcommand = scrollbarY.set, xscrollcommand=scrollbarX1.set, height=21, width=30)
@@ -208,11 +239,19 @@ class GUI(object):
 
     def console(self):
         root = self.root
-        console = Text(root, width=20, height=10)
-        console.grid(row=6, column=0, columnspan=10, sticky="E, W")
 
-        scrollbarY = Scrollbar(root)
-        scrollbarY.grid(row=6, column=10, sticky="NS, W")
+        title = Label(root, text="CONSOLE")
+        title.grid(row=6, column=0, columnspan=10, padx=20, pady=3, sticky="E, W")
+        title.configure(background="black", foreground="white", font="Helvetica 10 bold")
+
+        console = Text(root, width=20, height=10)
+        console.grid(row=7, column=0, columnspan=10, sticky="E, W")
+
+        console.configure(background="gray12", foreground="white")
+
+        
+        scrollbarY = ttk.Scrollbar(root, orient="vertical")
+        scrollbarY.grid(row=7, column=10, sticky="NS, W")
 
         console.config(yscrollcommand = scrollbarY.set, height=10, width=50)
         scrollbarY.config(command = console.yview)

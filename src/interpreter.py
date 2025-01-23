@@ -7,7 +7,7 @@ class Interpreter(object):
     def __init__(self, tokens, tk):
         self.tokens = tokens                                        #the tokens will be the one from the lexer.py
         self.root = tk
-        self.console = tk.winfo_children()[22]
+        self.console = tk.winfo_children()[23]
         self.identifier_gui = tk.winfo_children()[16]
         self.value_gui = tk.winfo_children()[18]
         self.i = 2                                                  #for iterating later, will start with two, won't include HAI and EOL

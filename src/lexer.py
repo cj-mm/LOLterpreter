@@ -11,7 +11,7 @@ class Lexer(object):
             
     def __init__(self, program, tk):
         self.program = program
-        self.console = tk.winfo_children()[22] # gui
+        self.console = tk.winfo_children()[23] # gui
         self.check = 1   # flag if the program passed the lexical analysis, initialize to true
     
     def check(self):

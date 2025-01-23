@@ -3,7 +3,7 @@ from tkinter import *
 class Parser(object):
 
     def __init__(self, tokens, tk):
-        self.console = tk.winfo_children()[22] # gui
+        self.console = tk.winfo_children()[23] # gui
         # the tokens will be the one from the lexer.py
         self.tokens = tokens
         self.i = 0  #for iterating later
