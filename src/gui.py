@@ -124,7 +124,7 @@ class GUI(object):
         self.fileExplorer(text_editor)
 
         execute_btn = Button(root, text="EXECUTE", command=lambda: self.execute(text_editor.get(1.0, END))) # pass the current contents of the text editor to execute function
-        execute_btn.grid(row=4, column=0, columnspan=10, padx=20, pady=3, sticky="E, W")
+        execute_btn.grid(row=4, column=0, columnspan=10, padx=20, pady="15 3", sticky="E, W")
         execute_btn.configure(background="orchid1", foreground="black", font="Helvetica 12 bold")
 
 
@@ -140,14 +140,14 @@ class GUI(object):
         lex_label.configure(background="black", foreground="white")
 
         lexeme = Listbox(root)
-        lexeme.grid(row=2, column=3)
+        lexeme.grid(row=2, column=3, padx="10 0")
 
         class_label = Label(root, text="Classification")
         class_label.grid(row=1, column=4)
         class_label.configure(background="black", foreground="white")
 
         classification = Listbox(root)
-        classification.grid(row=2, column=4)
+        classification.grid(row=2, column=4, padx=0)
 
         lexeme.configure(background="gray12")
         classification.configure(background="gray12")
@@ -166,14 +166,14 @@ class GUI(object):
         ident_label.configure(background="black", foreground="white")
 
         identifier = Listbox(root)
-        identifier.grid(row=2, column=7)
+        identifier.grid(row=2, column=7, padx="10 0")
 
         value_label = Label(root, text="Value")
         value_label.grid(row=1, column=8, padx=20, pady=3)
         value_label.configure(background="black", foreground="white")
         
         value = Listbox(root)
-        value.grid(row=2, column=8)
+        value.grid(row=2, column=8, padx=0)
 
         identifier.configure(background="gray12")
         value.configure(background="gray12")
@@ -189,10 +189,10 @@ class GUI(object):
         scrollbarY.grid(row=rowNum, column=colNum+3, sticky="NS, W")
 
         scrollbarX1 = ttk.Scrollbar(root, orient="horizontal")
-        scrollbarX1.grid(row=rowNum+1, column=colNum, columnspan=1, sticky="EW, S")
+        scrollbarX1.grid(row=rowNum+1, column=colNum, columnspan=1, sticky="EW, S", padx="10 0")
 
         scrollbarX2 = ttk.Scrollbar(root, orient="horizontal")
-        scrollbarX2.grid(row=rowNum+1, column=colNum+1, columnspan=2, sticky="EW, S")
+        scrollbarX2.grid(row=rowNum+1, column=colNum+1, columnspan=2, sticky="EW, S", padx=0)
 
         col1.config(yscrollcommand = scrollbarY.set, xscrollcommand=scrollbarX1.set, height=21, width=30)
         col2.config(yscrollcommand = scrollbarY.set, xscrollcommand=scrollbarX2.set, height=21, width=30)
