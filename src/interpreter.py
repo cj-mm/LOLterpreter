@@ -749,12 +749,13 @@ class Interpreter(object):
             self.i += 1
             if self.bool_check():
                 var1 = self.single
-                self.i += 1  # for AN keyword
+                self.i += 1
             else:
                 return False
             if self.bool_check():
                 var2 = self.single
                 self.bool_solve(var1, var2, ope)
+                self.var_update("IT", self.single, "TROOF")  # save result to IT
                 return True
             else:
                 return False
@@ -763,6 +764,7 @@ class Interpreter(object):
             if self.bool_check():
                 var1 = self.single
                 self.bool_solve(var1, var2, ope)
+                self.var_update("IT", self.single, "TROOF")  # save result to IT
                 return True
             else:
                 return False
@@ -771,7 +773,9 @@ class Interpreter(object):
             if self.bool_check() or self.all_any_arg():
                 var1 = self.single
                 self.bool_arg(ope, var1)
-                self.var_update("IT", self.single, "YARN")
+                self.var_update(
+                    "IT", self.single, "TROOF"
+                )  # fixed type from "YARN" to "TROOF"
             return True
         else:
             return False
@@ -808,6 +812,7 @@ class Interpreter(object):
     # if operands are not TROOFS, will implicitly typecast
     # for NUMBR and NUMBAR: numerical zero will be FAIL
     # for YARN: "" will be FAIL
+    # AFTER
     def bool_check(self):
         if self.identifier():
             if self.get_val(self.tokens[self.i - 1][1]):
@@ -829,18 +834,21 @@ class Interpreter(object):
                 return False
         elif self.tokens[self.i][0] == "TROOF":
             self.single = self.tokens[self.i][1]
+            self.i += 1  # move forward after reading
             return True
         elif self.tokens[self.i][0] == "NUMBR" or self.tokens[self.i][0] == "NUMBAR":
             if int(self.tokens[self.i][1]) == 0:
                 self.single = "FAIL"
             else:
                 self.single = "WIN"
+            self.i += 1  # move forward after reading
             return True
         elif self.tokens[self.i][0] == "YARN":
             if self.tokens[self.i][1] == "":
                 self.single = "FAIL"
             else:
                 self.single = "WIN"
+            self.i += 1  # move forward after reading
             return True
         elif self.comparison():
             return True
@@ -890,7 +898,7 @@ class Interpreter(object):
 
             var1 = str(self.single)
 
-            self.i += 1  # for AN keyword
+            self.i += 1
             if self.identifier():
                 if not self.get_val(self.tokens[self.i - 1][1]):
                     return False
@@ -912,8 +920,8 @@ class Interpreter(object):
                 else:
                     self.single = "FAIL"
 
-            # storing the result to IT
-            self.var_update("IT", self.single, self.type)
+            # FIXED — comparison results are always TROOF, regardless of operand types
+            self.var_update("IT", self.single, "TROOF")
             return True
         return False
 
