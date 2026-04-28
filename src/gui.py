@@ -1,10 +1,11 @@
 from tkinter import *
-from tkinter import filedialog
+from tkinter import filedialog, simpledialog
 import os
 import lexer
 import parse
 import interpreter
 from tkinter import ttk
+from errors import LexerError, ParseError, InterpreterError
 
 
 class GUI(object):
@@ -47,37 +48,57 @@ class GUI(object):
     def execute(self, program):
         console = self.console_widget
         console.config(state=NORMAL)
-        console.delete("1.0", END)  # deletes the content of the console
+        console.delete("1.0", END)
 
-        # #######################################
-        # LEXICAL ANALYZER PART
-        # #######################################
-        lex = lexer.Lexer(program, self.root)
-        # then call tokenize that will return the tokens from the program
-        tokens = lex.tokenize()
-        self.populateLexemes(tokens, lex.check)
+        def write_to_console(msg):
+            console.config(state=NORMAL)
+            console.insert(END, str(msg))
+            console.config(state=DISABLED)
 
-        parser = parse.Parser(tokens, self.root)
-        ########################################
-        # SYNTAX ANALYZER PART
-        ########################################
-        if lex.check != 0 and not program.isspace():
-            # calling the parser class from import parser.py, create an instance and pass the tokens from the lexer
-            parser.program()
+        def get_input(prompt):
+            return simpledialog.askstring("Input", prompt, parent=self.root)
 
-        # ########################################
-        # # INTERPRETER
-        # ########################################
-        if parser.checkErr() != 0:
+        def update_symbol_table(table):
             self.identifier_widget.delete(0, END)
             self.value_widget.delete(0, END)
+            for item in table:
+                self.identifier_widget.insert(END, item[0])
+                self.value_widget.insert(END, item[1])
 
-            interpret = interpreter.Interpreter(tokens, self.root)
-            interpret.program()
+        try:
+            lex = lexer.Lexer(program, on_error=write_to_console)
+            tokens = lex.tokenize()
+            self.populateLexemes(tokens, lex.check)
 
-            for i in range(0, self.identifier_widget.index("end")):
-                self.identifier_widget.itemconfig(i, {"fg": "white"})
-                self.value_widget.itemconfig(i, {"fg": "white"})
+            parser = parse.Parser(tokens, on_error=write_to_console)
+            if lex.check != 0 and not program.isspace():
+                parser.program()
+
+            if parser.checkErr() != 0:
+                self.identifier_widget.delete(0, END)
+                self.value_widget.delete(0, END)
+
+                interpret = interpreter.Interpreter(
+                    tokens,
+                    on_error=write_to_console,
+                    on_output=write_to_console,
+                    on_input=get_input,
+                    on_symbol_update=update_symbol_table,
+                )
+                interpret.program()
+
+                for i in range(0, self.identifier_widget.index("end")):
+                    self.identifier_widget.itemconfig(i, {"fg": "white"})
+                    self.value_widget.itemconfig(i, {"fg": "white"})
+
+        except LexerError as e:
+            write_to_console(f"Lexer Error: {e}\n")
+        except ParseError as e:
+            write_to_console(f"Parse Error: {e}\n")
+        except InterpreterError as e:
+            write_to_console(f"Runtime Error: {e}\n")
+        except Exception as e:
+            write_to_console(f"Unexpected Error: {e}\n")
 
     # populates lexeme table
     def populateLexemes(self, tokens, err):
