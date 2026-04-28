@@ -1,4 +1,5 @@
 import re
+from errors import InterpreterError
 
 
 class Interpreter(object):
@@ -57,7 +58,7 @@ class Interpreter(object):
         elif len(self.tokens) - 2 == self.i:
             return True
         else:
-            self.updateConsole("Error at" + self.getError())
+            raise InterpreterError("Error at" + self.getError())
 
     # would update the value of the variable in the symbol table
     # if the variable is new, the just add
@@ -85,10 +86,10 @@ class Interpreter(object):
             if var == self.symbol_table[i][0]:
                 # if variable is declared but was not initialized
                 if self.symbol_table[i][1] == "NO VALUE":
-                    self.updateConsole(
+                    raise InterpreterError(
                         "Error (identifier has no value) at" + self.getError()
                     )
-                    return False
+
                 else:
                     self.single = self.symbol_table[i][1]
                     self.type = self.symbol_table[i][2]
@@ -173,21 +174,19 @@ class Interpreter(object):
                         self.single = float(self.single)
                         self.var_update(self.tokens[c][1], int(self.single), "NUMBR")
                     else:
-                        self.updateConsole(
+                        raise InterpreterError(
                             "Error (identifier cannot be typecasted) at"
                             + self.getError()
                         )
-                        return False
                 elif temp == "NUMBAR":
                     self.my_type(self.single)
                     if self.type == "NUMBR" or self.type == "NUMBAR":
                         self.var_update(self.tokens[c][1], float(self.single), "NUMBAR")
                     else:
-                        self.updateConsole(
+                        raise InterpreterError(
                             "Error (identifier cannot be typecasted) at"
                             + self.getError()
                         )
-                        return False
                 else:  # TROOF
                     self.my_type(self.single)
                     if self.type == "YARN":
@@ -196,19 +195,17 @@ class Interpreter(object):
                                 self.tokens[c][1], str(self.single), "TROOF"
                             )
                         else:
-                            self.updateConsole(
+                            raise InterpreterError(
                                 "Error (identifier cannot be typecasted) at"
                                 + self.getError()
                             )
-                            return False
                     elif self.type == "TROOF":
                         self.var_update(self.tokens[c][1], self.single, "TROOF")
                     else:
-                        self.updateConsole(
+                        raise InterpreterError(
                             "Error (identifier cannot be typecasted) at"
                             + self.getError()
                         )
-                        return False
                 return True
         return False
 
@@ -316,36 +313,34 @@ class Interpreter(object):
                 self.single = float(self.single)
                 self.var_update("IT", int(self.single), "NUMBR")
             else:
-                self.updateConsole(
+                raise InterpreterError(
                     "Error (identifier cannot be typecasted) at" + self.getError()
                 )
-                return False
+
         elif temp == "NUMBAR":
             self.my_type(self.single)
             if self.type == "NUMBR" or self.type == "NUMBAR":
                 self.var_update("IT", float(self.single), "NUMBAR")
             else:
-                self.updateConsole(
+                raise InterpreterError(
                     "Error (identifier cannot be typecasted) at" + self.getError()
                 )
-                return False
+
         else:  # TROOF
             self.my_type(self.single)
             if self.type == "YARN":
                 if self.single == "WIN" or self.single == "FAIL":
                     self.var_update("IT", str(self.single), "TROOF")
                 else:
-                    self.updateConsole(
+                    raise InterpreterError(
                         "Error (identifier cannot be typecasted) at" + self.getError()
                     )
-                    return False
             elif self.type == "TROOF":
                 self.var_update("IT", self.single, "TROOF")
             else:
-                self.updateConsole(
+                raise InterpreterError(
                     "Error (identifier cannot be typecasted) at" + self.getError()
                 )
-                return False
         return True
 
     ####################
@@ -524,12 +519,14 @@ class Interpreter(object):
                         if self.type == "NUMBR":
                             self.single = int(self.single)
                         else:
-                            return False  # if YARN can't be casted into NUMBAR or NUMBR
+                            raise InterpreterError(
+                                "Error (data type) at" + self.getError()
+                            )  # if YARN can't be casted into NUMBAR or NUMBR
                     elif self.type == "NUMBR":
                         self.single = int(self.single)
                     else:
-                        self.updateConsole("Error (data type) at" + self.getError())
-                        return False
+                        raise InterpreterError("Error (data type) at" + self.getError())
+
                 else:
                     return False
             iteration = self.single
@@ -654,8 +651,8 @@ class Interpreter(object):
                     self.single = float(self.single)
                     return True
                 else:
-                    self.updateConsole("Error (data type) at" + self.getError())
-                    return False
+                    raise InterpreterError("Error (data type) at" + self.getError())
+
         elif self.math_literal():
             self.type = self.tokens[self.i - 1][0]
             self.single = self.tokens[self.i - 1][1]
@@ -688,19 +685,17 @@ class Interpreter(object):
                     self.single = int(self.single)
                     return True
                 else:
-                    self.updateConsole(
+                    raise InterpreterError(
                         "Error (identifier cannot be typecasted) at" + self.getError()
                     )
-                    return False
             elif temp == "NUMBAR":
                 if self.type == "NUMBR" or self.type == "NUMBAR":
                     self.single = float(self.single)
                     return True
                 else:
-                    self.updateConsole(
+                    raise InterpreterError(
                         "Error (identifier cannot be typecasted) at" + self.getError()
                     )
-                    return False
             else:
                 return False
         else:
@@ -956,8 +951,7 @@ class Interpreter(object):
                     self.single = float(self.single)
                     return True
                 else:
-                    self.updateConsole("Error (data type) at" + self.getError())
-                    return False
+                    raise InterpreterError("Error (data type) at" + self.getError())
         elif self.math_literal():
             self.type = self.tokens[self.i - 1][0]
             self.single = self.tokens[self.i - 1][1]
